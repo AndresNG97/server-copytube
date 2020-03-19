@@ -32,42 +32,42 @@ function register(req, res) {
 function login(req, res) {
   let body = req.body;
 
-  Usuario.findOne({ email: body.email }, (err, usuarioBD) => {
-    if (err) {
-      return res.status(500).json({
-        ok: false,
-        err
-      });
-    }
-    if (!usuarioBD) {
-      return res.status(400).json({
-        ok: false,
-        err: {
-          message: "(Email) o Contraseña incorrectos"
-        }
-      });
-    }
-    if (!bcrypt.compareSync(body.password, usuarioBD.password)) {
-      return res.status(400).json({
-        ok: false,
-        err: {
-          message: "Email o (Contraseña) incorrectos"
-        }
-      });
-    }
-    let Authorization = jwt.sign(
-      { usuario: usuarioBD },
-      process.env.SEED_TOKEN,
-      {
-        expiresIn: process.env.CADUCIDAD_TOKEN
+  Usuario.findOne(
+    { email: { $regex: new RegExp("^" + body.email, "i") } },
+    (err, usuarioDB) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          err
+        });
       }
-    );
-    res.json({
-      ok: true,
-      usuario: usuarioBD,
-      Authorization
-    });
-  });
+      if (!usuarioDB) {
+        return res.status(400).json({
+          ok: false,
+          err: {
+            message: "(Email) o Contraseña incorrectos"
+          }
+        });
+      }
+      if (!bcrypt.compareSync(body.password, usuarioDB.password)) {
+        return res.status(400).json({
+          ok: false,
+          err: {
+            message: "Email o (Contraseña) incorrectos"
+          }
+        });
+      }
+      let Authorization = jwt.sign({ usuarioDB }, process.env.SEED_TOKEN, {
+        expiresIn: process.env.CADUCIDAD_TOKEN
+      });
+
+      res.json({
+        ok: true,
+        usuarioDB,
+        Authorization
+      });
+    }
+  );
 }
 
 module.exports = {
