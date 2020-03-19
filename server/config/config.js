@@ -15,11 +15,12 @@ if (process.env.NODE_ENV === "dev") {
 
 process.env.NODE_ENV = urlDB;
 
-process.env.SEED_TOKEN = "SEED_TOKEN_LOGIN-AUTH-CRITOWEN-SECRET";
+process.env.SEED_TOKEN =
+  "xiH3+OLPffcn6mSqCbVNpflAKPwRz+StrkW6yHZUGsgHdfjo5TOIyR2YmF6Jr+1uBldhxVq9BRmwVi4V3wABIA==";
 
 // Vencimiento del Token
 // 60 Segundos
 // 60 Minutos
 // 24 Horas
 // 30 Dias
-process.env.CADUCIDAD_TOKEN = 60 * 60 * 24 * 30;
+process.env.CADUCIDAD_TOKEN = "1w";
