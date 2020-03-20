@@ -4,14 +4,8 @@ process.env.PORT = process.env.PORT || 3100;
 //Entorno
 process.env.NODE_ENV = process.env.NODE_ENV || "dev";
 
-let urlDB;
-
-if (process.env.NODE_ENV === "dev") {
-  urlDB =
-    "mongodb+srv://admin_copytube:KfmQYq1G9L70JiqG@cluster0-qz4op.mongodb.net/copytube?retryWrites=true&w=majority";
-} else {
-  urlDB = process.env.MONGO_URI;
-}
+let urlDB =
+  "mongodb+srv://admin_copytube:KfmQYq1G9L70JiqG@cluster0-qz4op.mongodb.net/copytube?retryWrites=true&w=majority";
 
 process.env.NODE_ENV = urlDB;
 

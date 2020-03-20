@@ -4,10 +4,10 @@ const mongoose = require("mongoose");
 // Enviroment Variables
 require("./config/config");
 
-const api = express();
+const app = express();
 
 // Configure Header HTTP
-api.use((req, res, next) => {
+app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
     "Access-Control-Allow-Headers",
@@ -19,7 +19,7 @@ api.use((req, res, next) => {
 });
 
 // Configuracion de rutas
-api.use(require("./routes/usuario"));
+app.use(require("./routes/usuario"));
 
 // Mongoose configuracion basica requerida
 mongoose.set("useNewUrlParser", true);
@@ -34,6 +34,6 @@ mongoose.connect(process.env.NODE_ENV, (err, res) => {
 });
 
 // Puerto que escucha el servidor
-api.listen(process.env.PORT, () => {
+app.listen(process.env.PORT, () => {
   console.log("Escuchando el puerto: ", process.env.PORT);
 });
