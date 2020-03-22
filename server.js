@@ -25,6 +25,7 @@ app.use(require("./routes/usuario"));
 mongoose.set("useNewUrlParser", true);
 mongoose.set("useUnifiedTopology", true);
 mongoose.set("useCreateIndex", true);
+mongoose.set("useFindAndModify", false);
 
 // Conexion a moongose
 mongoose.connect(process.env.NODE_ENV, (err, res) => {

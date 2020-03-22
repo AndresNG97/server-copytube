@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
-const _ = require("underscore");
 const jwt = require("jsonwebtoken");
 const Usuario = require("../models/usuario");
+const _ = require("underscore");
 
 // Registro usuario
 function register(req, res) {
@@ -70,7 +70,79 @@ function login(req, res) {
   );
 }
 
+function updateAvatar(req, res) {
+  if (!req.files) {
+    return res.status(400).json({
+      ok: false,
+      err: {
+        message: "No se ha seleccionado ninguna imagen"
+      }
+    });
+  }
+
+  let avatar = req.files.avatar;
+
+  avatar.mv("uploads/filename.jpg", err => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        err
+      });
+    }
+
+    res.json({
+      ok: true,
+      message: "Imagen subida correctamente"
+    });
+  });
+}
+
+function updateAccount(req, res) {
+  let id = req.params.id;
+  let body = req.body;
+
+  if (body.password) {
+    body.password = bcrypt.hashSync(body.password, 10);
+  }
+
+  let usuarioParams = _.pick(req.body, [
+    "name",
+    "lastname",
+    "email",
+    "password"
+  ]);
+
+  Usuario.findByIdAndUpdate(id, usuarioParams, {
+    new: true
+  }).exec((err, usuario) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        err
+      });
+    }
+
+    if (!usuario) {
+      return res.status(400).json({
+        ok: false,
+        err: {
+          message: "No se ha encontrado el usuario"
+        }
+      });
+    }
+
+    usuario.password = bcrypt.hashSync(usuario.password, 10);
+
+    res.json({
+      ok: true,
+      usuario
+    });
+  });
+}
+
 module.exports = {
   register,
-  login
+  login,
+  updateAvatar,
+  updateAccount
 };
