@@ -17,6 +17,8 @@ function uploadVideo(req, res) {
     idUser
   });
 
+  console.log(body.title);
+
   Usuario.findById(idUser, {
     new: true
   }).exec((err, userStored) => {

@@ -27,10 +27,4 @@ api.get(
 api.get("/getAvatar/:idUser", [upload_avatar], UserController.getAvatar);
 api.put("/updateAccount/:idUser", verificaToken, UserController.updateAccount);
 
-api.put(
-  "/confirmUpdateAccount/:idUser",
-  verificaToken,
-  UserController.confirmUpdateAccount
-);
-
 module.exports = api;

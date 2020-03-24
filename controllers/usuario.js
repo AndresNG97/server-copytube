@@ -32,6 +32,8 @@ function register(req, res) {
   });
 }
 
+// Login
+
 function login(req, res) {
   let body = req.body;
 
@@ -74,7 +76,9 @@ function login(req, res) {
   );
 }
 
-function updateAvatar(req, res) {
+// Update Avatar
+
+async function updateAvatar(req, res) {
   let idUser = req.params.idUser;
   let body = req.body;
 
@@ -104,7 +108,7 @@ function updateAvatar(req, res) {
   body.img = `${idUser}.${extension}`;
   let usuarioParams = _.pick(req.body, ["img"]);
 
-  Usuario.findByIdAndUpdate(idUser, usuarioParams).exec((err, userStored) => {
+  Usuario.findByIdAndUpdate(idUser, usuarioParams, async (err, userStored) => {
     if (err) {
       return res.status(500).json({
         ok: false,
@@ -119,11 +123,22 @@ function updateAvatar(req, res) {
       });
     }
 
-    let filePath = `uploads/avatars/${userStored.img}`;
+    if (!bcrypt.compareSync(body.actualPassword, userStored.password)) {
+      return res.status(400).json({
+        ok: false,
+        err: {
+          message: "Las contraseñas no coinciden"
+        }
+      });
+    }
 
-    fs.exists(filePath, exists => {
-      if (exists) {
-        console.log("existe");
+    const filePath = `uploads/avatars/${userStored.img}`;
+    let extensionUserStoredImg = userStored.img.split(".");
+    extensionUserStoredImg =
+      extensionUserStoredImg[extensionUserStoredImg.length - 1];
+
+    await fs.exists(filePath, exists => {
+      if (exists && extension !== extensionUserStoredImg) {
         fs.unlink(filePath, err => {
           if (err) {
             return res.status(400).json({
@@ -135,7 +150,7 @@ function updateAvatar(req, res) {
       }
     });
 
-    avatar.mv(`uploads/avatars/${idUser}.${extension}`, err => {
+    await avatar.mv(`uploads/avatars/${idUser}.${extension}`, err => {
       if (err) {
         return res.status(500).json({
           ok: false,
@@ -150,6 +165,8 @@ function updateAvatar(req, res) {
     });
   });
 }
+
+// Update Account
 
 function updateAccount(req, res) {
   let idUser = req.params.idUser;
@@ -168,7 +185,7 @@ function updateAccount(req, res) {
 
   Usuario.findByIdAndUpdate(idUser, usuarioParams, {
     new: true
-  }).exec((err, usuario) => {
+  }).exec((err, userStored) => {
     if (err) {
       return res.status(500).json({
         ok: false,
@@ -176,7 +193,7 @@ function updateAccount(req, res) {
       });
     }
 
-    if (!usuario) {
+    if (!userStored) {
       return res.status(400).json({
         ok: false,
         err: {
@@ -185,11 +202,20 @@ function updateAccount(req, res) {
       });
     }
 
-    usuario.password = bcrypt.hashSync(usuario.password, 10);
+    if (!bcrypt.compareSync(body.actualPassword, userStored.password)) {
+      return res.status(400).json({
+        ok: false,
+        err: {
+          message: "Las contraseñas no coinciden"
+        }
+      });
+    }
+
+    userStored.password = bcrypt.hashSync(userStored.password, 10);
 
     res.json({
       ok: true,
-      usuario
+      userStored
     });
   });
 }
@@ -271,60 +297,11 @@ function getAvatar(req, res) {
   });
 }
 
-function confirmUpdateAccount(req, res) {
-  const idUser = req.params.idUser;
-  const body = req.body;
-
-  if (!body.actualPassword) {
-    return res.status(400).json({
-      ok: false,
-      err: {
-        message: "No se ha enviado la contraseña actual"
-      }
-    });
-  }
-
-  Usuario.findById(idUser, (err, userStored) => {
-    if (err) {
-      return res.status(500).json({
-        ok: false,
-        err: {
-          message: "Error del servidor"
-        }
-      });
-    }
-
-    if (!userStored) {
-      return res.status(400).json({
-        ok: false,
-        err: {
-          message: "No se ha encontrado al usuario"
-        }
-      });
-    }
-
-    if (!bcrypt.compareSync(body.actualPassword, userStored.password)) {
-      return res.status(400).json({
-        ok: false,
-        err: {
-          message: "Las contraseñas no coinciden"
-        }
-      });
-    }
-
-    res.json({
-      ok: true,
-      userStored
-    });
-  });
-}
-
 module.exports = {
   register,
   login,
   updateAccount,
   updateAvatar,
   getImageEditAccount,
-  getAvatar,
-  confirmUpdateAccount
+  getAvatar
 };
