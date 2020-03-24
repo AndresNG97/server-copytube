@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
 
 // Enviroment Variables
 require("./config/config");
@@ -7,19 +8,21 @@ require("./config/config");
 const app = express();
 
 // Configure Header HTTP
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method"
-  );
-  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
-  res.header("Allow", "GET, POST, OPTIONS, PUT, DELETE");
-  next();
-});
+app.use(cors());
+
+// app.use((req, res, next) => {
+//   res.header("Access-Control-Allow-Origin", "*");
+//   res.header(
+//     "Access-Control-Allow-Headers",
+//     "Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method"
+//   );
+//   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
+//   res.header("Allow", "GET, POST, OPTIONS, PUT, DELETE");
+//   next();
+// });
 
 // Configuracion de rutas
-app.use(require("./routes/usuario"));
+app.use(require("./routes/index"));
 
 // Mongoose configuracion basica requerida
 mongoose.set("useNewUrlParser", true);

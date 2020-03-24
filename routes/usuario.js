@@ -14,11 +14,23 @@ api.use(express.json());
 api.post("/register", UserController.register);
 api.post("/login", UserController.login);
 api.put(
-  "/updateAvatar",
+  "/updateAvatar/:idUser",
   verificaToken,
   [upload_avatar],
   UserController.updateAvatar
 );
-api.put("/updateAccount/:id", verificaToken, UserController.updateAccount);
+api.get(
+  "/getImageEditAccount/:idUser",
+  [upload_avatar],
+  UserController.getImageEditAccount
+);
+api.get("/getAvatar/:idUser", [upload_avatar], UserController.getAvatar);
+api.put("/updateAccount/:idUser", verificaToken, UserController.updateAccount);
+
+api.put(
+  "/confirmUpdateAccount/:idUser",
+  verificaToken,
+  UserController.confirmUpdateAccount
+);
 
 module.exports = api;
