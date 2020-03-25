@@ -13,11 +13,10 @@ function uploadVideo(req, res) {
   let video = new Video({
     title: body.title,
     description: body.description,
-    thumbnail: body.thumbnail,
+    videoname: "",
+    thumbnail: "",
     idUser
   });
-
-  console.log(body.title);
 
   Usuario.findById(idUser, {
     new: true
@@ -46,12 +45,31 @@ function uploadVideo(req, res) {
         }
       });
     }
+
     const idVideo = video._id;
+    //Thumbnail info
+    const thumbnailFile = req.files.thumbnail;
+    const extensionThumbnail = mime.extension(thumbnailFile.mimetype);
+    const extensionValidasThumbnail = ["png", "jpeg"];
+    video.thumbnail = `${idVideo}.${extensionThumbnail}`;
+
+    if (extensionValidasThumbnail.indexOf(extensionThumbnail) < 0) {
+      return res.status(400).json({
+        ok: false,
+        err: {
+          message:
+            "La extension del video no es valido. (Extensiones permitidas: png, jpeg)"
+        }
+      });
+    }
+
+    //Video info
     const videoFile = req.files.video;
-    const extension = mime.extension(videoFile.mimetype);
-    const extensionValidas = ["mp4", "avi"];
-    console.log(extension);
-    if (extensionValidas.indexOf(extension) < 0) {
+    const extensionVideo = mime.extension(videoFile.mimetype);
+    const extensionValidasVideo = ["mp4", "avi"];
+    video.videoname = `${idVideo}.${extensionVideo}`;
+
+    if (extensionValidasVideo.indexOf(extensionVideo) < 0) {
       return res.status(400).json({
         ok: false,
         err: {
@@ -61,15 +79,6 @@ function uploadVideo(req, res) {
       });
     }
 
-    videoFile.mv(`uploads/videos/${idVideo}.${extension}`, err => {
-      if (err) {
-        return res.status(500).json({
-          ok: false,
-          err
-        });
-      }
-    });
-
     video.save((err, videoStored) => {
       if (err) {
         return res.status(400).json({
@@ -77,6 +86,27 @@ function uploadVideo(req, res) {
           err
         });
       }
+
+      thumbnailFile.mv(
+        `uploads/thumbnail/${idVideo}.${extensionThumbnail}`,
+        err => {
+          if (err) {
+            return res.status(500).json({
+              ok: false,
+              err
+            });
+          }
+        }
+      );
+
+      videoFile.mv(`uploads/videos/${idVideo}.${extensionVideo}`, err => {
+        if (err) {
+          return res.status(500).json({
+            ok: false,
+            err
+          });
+        }
+      });
 
       res.json({
         ok: true,

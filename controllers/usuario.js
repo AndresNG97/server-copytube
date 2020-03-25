@@ -258,6 +258,7 @@ function getImageEditAccount(req, res) {
     });
   });
 }
+
 function getAvatar(req, res) {
   const idUser = req.params.idUser;
 

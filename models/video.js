@@ -8,13 +8,15 @@ let videoSchema = new Schema(
       required: [true, "El titulo es necesario"]
     },
     description: {
+      type: String
+    },
+    videoname: {
       type: String,
-      required: [true, "La descripción es necesaria"]
+      required: [true, "El nombre del video es necesario"]
     },
     thumbnail: {
       type: String,
-      required: [true, "El thumbnail es necesario"],
-      default: "defualtThumbnail.png"
+      required: [true, "El thumbnail del video es necesario"]
     },
     idUser: {
       type: String,
