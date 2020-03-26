@@ -251,9 +251,39 @@ function getVideo(req, res) {
   });
 }
 
+function getVideoInfo(req, res) {
+  let idVideo = req.params.idVideo;
+
+  Video.findById(idVideo, (err, videoStored) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        err: {
+          message: "Error del servidor"
+        }
+      });
+    }
+
+    if (!videoStored) {
+      return res.status(400).json({
+        ok: false,
+        err: {
+          message: "Video no encontrado"
+        }
+      });
+    }
+
+    res.json({
+      ok: true,
+      videoStored
+    });
+  });
+}
+
 module.exports = {
   getVideos,
   uploadVideo,
   getThumbnail,
-  getVideo
+  getVideo,
+  getVideoInfo
 };

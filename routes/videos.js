@@ -22,4 +22,5 @@ api.get("/getVideos", VideoController.getVideos);
 
 api.get("/getThumbnail/:idVideo", VideoController.getThumbnail);
 api.get("/getVideo/:idVideo", VideoController.getVideo);
+api.get("/getVideoInfo/:idVideo", VideoController.getVideoInfo);
 module.exports = api;
