@@ -4,7 +4,7 @@ const fileUpload = require("express-fileupload");
 const api = express.Router();
 
 const { verificaToken } = require("../middlewares/autenticacion");
-const upload_avatar = fileUpload({ useTempFiles: true });
+const file = fileUpload({ useTempFiles: true });
 
 api.use(express.urlencoded({ extended: false }));
 
@@ -16,15 +16,11 @@ api.post("/login", UserController.login);
 api.put(
   "/updateAvatar/:idUser",
   verificaToken,
-  [upload_avatar],
+  [file],
   UserController.updateAvatar
 );
-api.get(
-  "/getImageEditAccount/:idUser",
-  [upload_avatar],
-  UserController.getImageEditAccount
-);
-api.get("/getAvatar/:idUser", [upload_avatar], UserController.getAvatar);
+api.get("/getImageEditAccount/:idUser", UserController.getImageEditAccount);
+api.get("/getAvatar/:idUser", UserController.getAvatar);
 api.put("/updateAccount/:idUser", verificaToken, UserController.updateAccount);
 
 module.exports = api;

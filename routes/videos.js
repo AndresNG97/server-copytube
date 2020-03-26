@@ -18,4 +18,8 @@ api.post(
   VideoController.uploadVideo
 );
 
+api.get("/getVideos", VideoController.getVideos);
+
+api.get("/getThumbnail/:idVideo", VideoController.getThumbnail);
+api.get("/getVideo/:idVideo", VideoController.getVideo);
 module.exports = api;
