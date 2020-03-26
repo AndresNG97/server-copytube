@@ -10,13 +10,13 @@ let videoSchema = new Schema(
     description: {
       type: String
     },
-    videoname: {
+    video: {
       type: String,
-      required: [true, "El nombre del video es necesario"]
+      required: [true, "La url del video es necesaria"]
     },
     thumbnail: {
       type: String,
-      required: [true, "El thumbnail del video es necesario"]
+      required: [true, "La url del thumbnail del video es necesaria"]
     },
     idUser: {
       type: String,

@@ -5,6 +5,8 @@ const Usuario = require("../models/usuario");
 const _ = require("underscore");
 var mime = require("mime-types");
 const sharp = require("sharp");
+const awsUploadImage = require("../middlewares/awsUploadImage");
+const awsUploadVideo = require("../middlewares/awsUploadVideo");
 
 // Get Videos
 function getVideos(req, res) {
@@ -45,7 +47,7 @@ function uploadVideo(req, res) {
   let video = new Video({
     title: body.title,
     description: body.description,
-    videoname: "",
+    video: "",
     thumbnail: "",
     idUser
   });
@@ -84,7 +86,7 @@ function uploadVideo(req, res) {
     const thumbnailFile = req.files.thumbnail;
     const extensionThumbnail = mime.extension(thumbnailFile.mimetype);
     const extensionValidasThumbnail = ["png", "jpeg"];
-    video.thumbnail = `${idVideo}.${extensionThumbnail}`;
+    // video.thumbnail = `${idVideo}.${extensionThumbnail}`;
 
     if (extensionValidasThumbnail.indexOf(extensionThumbnail) < 0) {
       return res.status(400).json({
@@ -101,7 +103,7 @@ function uploadVideo(req, res) {
     const videoFile = req.files.video;
     const extensionVideo = mime.extension(videoFile.mimetype);
     const extensionValidasVideo = ["mp4", "avi"];
-    video.videoname = `${idVideo}.${extensionVideo}`;
+    // video.video = `${idVideo}.${extensionVideo}`;
 
     if (extensionValidasVideo.indexOf(extensionVideo) < 0) {
       return res.status(400).json({
@@ -113,64 +115,42 @@ function uploadVideo(req, res) {
       });
     }
 
-    video.save((err, videoStored) => {
-      if (err) {
-        return res.status(400).json({
-          ok: false,
-          err
-        });
-      }
-
-      let thumbnailPath = `uploads/thumbnail/${idVideo}.${extensionThumbnail}`;
-      let thumbnailPathResized = `uploads/thumbnail/resize/${idVideo}.${extensionThumbnail}`;
-      let videoPath = `uploads/videos/${idVideo}.${extensionVideo}`;
-
-      thumbnailFile.mv(thumbnailPath, err => {
+    sharp(thumbnailFile.tempFilePath)
+      .resize(720, 405, {
+        fit: sharp.fit.fill
+      })
+      .toBuffer(function(err, buffer) {
         if (err) {
           return res.status(500).json({
             ok: false,
             err
           });
         }
-      });
 
-      sharp(thumbnailPath)
-        .resize(720, 405, {
-          fit: sharp.fit.fill
-        })
-        .toFile(thumbnailPathResized)
-        .then(data => {
-          fs.exists(thumbnailPath, exists => {
-            if (exists) {
-              fs.unlink(thumbnailPath, err => {
-                if (err) {
-                  return res.status(400).json({
-                    ok: false,
-                    err
-                  });
-                }
+        let thumbnailPath = `uploads/thumbnail/${idVideo}.${extensionThumbnail}`;
+        awsUploadImage(buffer, thumbnailPath, function(resultImg) {
+          video.thumbnail = resultImg;
+
+          let videoPath = `uploads/videos/${idVideo}.${extensionVideo}`;
+          awsUploadVideo(videoFile, videoPath, function(resultVideo) {
+            video.video = resultVideo;
+
+            video.save((err, videoStored) => {
+              if (err) {
+                return res.status(400).json({
+                  ok: false,
+                  err
+                });
+              }
+
+              res.json({
+                ok: true,
+                videoStored
               });
-            }
+            });
           });
-        })
-        .catch(err => {
-          console.log(err);
         });
-
-      videoFile.mv(videoPath, err => {
-        if (err) {
-          return res.status(500).json({
-            ok: false,
-            err
-          });
-        }
       });
-
-      res.json({
-        ok: true,
-        videoStored
-      });
-    });
   });
 }
 
@@ -198,18 +178,9 @@ function getThumbnail(req, res) {
 
     const { thumbnail } = videoStored;
 
-    if (!thumbnail) {
-      return res.sendFile(path.resolve("uploads/default/defaultAvatar.png"));
-    }
-    const filePath = "uploads/thumbnail/resize/" + thumbnail;
-    fs.exists(filePath, exists => {
-      if (!exists) {
-        return res
-          .status(404)
-          .send({ message: "El thumbnail que buscas no existe." });
-      } else {
-        return res.sendFile(path.resolve(filePath));
-      }
+    res.json({
+      ok: true,
+      thumbnail
     });
   });
 }
@@ -236,17 +207,13 @@ function getVideo(req, res) {
       });
     }
 
-    const { videoname } = videoStored;
+    const { video, title, description } = videoStored;
 
-    const filePath = "uploads/videos/" + videoname;
-    fs.exists(filePath, exists => {
-      if (!exists) {
-        return res
-          .status(404)
-          .send({ message: "El video que buscas no existe." });
-      } else {
-        return res.sendFile(path.resolve(filePath));
-      }
+    res.json({
+      ok: true,
+      title,
+      video,
+      description
     });
   });
 }

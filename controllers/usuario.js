@@ -5,6 +5,8 @@ const jwt = require("jsonwebtoken");
 const Usuario = require("../models/usuario");
 const _ = require("underscore");
 var mime = require("mime-types");
+const awsUploadImage = require("../middlewares/awsUploadImage");
+const sharp = require("sharp");
 
 // Registro usuario
 function register(req, res) {
@@ -104,66 +106,67 @@ async function updateAvatar(req, res) {
       }
     });
   }
+  const filePath = `uploads/avatars/${idUser}.${extension}`;
 
-  body.img = `${idUser}.${extension}`;
-  let usuarioParams = _.pick(req.body, ["img"]);
-
-  Usuario.findByIdAndUpdate(idUser, usuarioParams, async (err, userStored) => {
-    if (err) {
-      return res.status(500).json({
-        ok: false,
-        err
-      });
-    }
-
-    if (!userStored) {
-      return res.status(400).json({
-        ok: false,
-        err
-      });
-    }
-
-    if (!bcrypt.compareSync(body.actualPassword, userStored.password)) {
-      return res.status(400).json({
-        ok: false,
-        err: {
-          message: "Las contraseñas no coinciden"
-        }
-      });
-    }
-
-    const filePath = `uploads/avatars/${userStored.img}`;
-    let extensionUserStoredImg = userStored.img.split(".");
-    extensionUserStoredImg =
-      extensionUserStoredImg[extensionUserStoredImg.length - 1];
-
-    await fs.exists(filePath, exists => {
-      if (exists && extension !== extensionUserStoredImg) {
-        fs.unlink(filePath, err => {
-          if (err) {
-            return res.status(400).json({
-              ok: false,
-              err
-            });
-          }
-        });
-      }
-    });
-
-    await avatar.mv(`uploads/avatars/${idUser}.${extension}`, err => {
+  sharp(avatar.tempFilePath)
+    .resize(720, 405, {
+      fit: sharp.fit.fill
+    })
+    .toBuffer(function(err, buffer) {
       if (err) {
         return res.status(500).json({
           ok: false,
           err
         });
       }
+      awsUploadImage(buffer, filePath, function(result) {
+        body.img = result;
+        let usuarioParams = _.pick(req.body, ["img"]);
 
-      res.json({
-        ok: true,
-        message: "Imagen subida correctamente"
+        Usuario.findByIdAndUpdate(
+          idUser,
+          usuarioParams,
+          async (err, userStored) => {
+            if (err) {
+              return res.status(500).json({
+                ok: false,
+                err
+              });
+            }
+
+            if (!userStored) {
+              return res.status(400).json({
+                ok: false,
+                err
+              });
+            }
+
+            if (!body.actualPassword) {
+              return res.status(400).json({
+                ok: false,
+                err: {
+                  message: "La contraseña actual es obligatoria"
+                }
+              });
+            }
+
+            if (!bcrypt.compareSync(body.actualPassword, userStored.password)) {
+              return res.status(400).json({
+                ok: false,
+                err: {
+                  message: "Las contraseñas no coinciden"
+                }
+              });
+            }
+
+            res.json({
+              ok: true,
+              message: "Avatar subido correctamente"
+            });
+          }
+        );
       });
     });
-  });
 }
 
 // Update Account
@@ -220,45 +223,6 @@ function updateAccount(req, res) {
   });
 }
 
-function getImageEditAccount(req, res) {
-  const idUser = req.params.idUser;
-
-  Usuario.findById(idUser, (err, userStored) => {
-    if (err) {
-      return res.status(500).json({
-        ok: false,
-        err: {
-          message: "Error del servidor"
-        }
-      });
-    }
-    if (!userStored) {
-      return res.status(400).json({
-        ok: false,
-        err: {
-          message: "Usuario no encontrado"
-        }
-      });
-    }
-    const { img } = userStored;
-
-    if (!img) {
-      return res.sendFile(path.resolve("uploads/default/default.png"));
-    }
-
-    const filePath = "uploads/avatars/" + img;
-    fs.exists(filePath, exists => {
-      if (!exists) {
-        return res
-          .status(404)
-          .send({ message: "El avatar que buscas no existe." });
-      } else {
-        return res.sendFile(path.resolve(filePath));
-      }
-    });
-  });
-}
-
 function getAvatar(req, res) {
   const idUser = req.params.idUser;
 
@@ -279,21 +243,16 @@ function getAvatar(req, res) {
         }
       });
     }
+
     const { img } = userStored;
 
     if (!img) {
       return res.sendFile(path.resolve("uploads/default/defaultAvatar.png"));
     }
 
-    const filePath = "uploads/avatars/" + img;
-    fs.exists(filePath, exists => {
-      if (!exists) {
-        return res
-          .status(404)
-          .send({ message: "El avatar que buscas no existe." });
-      } else {
-        return res.sendFile(path.resolve(filePath));
-      }
+    return res.json({
+      ok: true,
+      img
     });
   });
 }
@@ -303,6 +262,5 @@ module.exports = {
   login,
   updateAccount,
   updateAvatar,
-  getImageEditAccount,
   getAvatar
 };

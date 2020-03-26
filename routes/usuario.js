@@ -19,7 +19,6 @@ api.put(
   [file],
   UserController.updateAvatar
 );
-api.get("/getImageEditAccount/:idUser", UserController.getImageEditAccount);
 api.get("/getAvatar/:idUser", UserController.getAvatar);
 api.put("/updateAccount/:idUser", verificaToken, UserController.updateAccount);
 
