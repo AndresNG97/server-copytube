@@ -14,7 +14,6 @@ const s3 = new AWS.S3({
 function awsUploadImage(file, filePath, callback) {
   //   fs.readFile(file.tempFilePath, (err, data) => {
   // if (err) throw err;
-  console.log(file);
   const params = {
     Bucket: BUCKET_NAME,
     Key: `${filePath}`,

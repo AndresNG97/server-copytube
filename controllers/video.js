@@ -8,35 +8,77 @@ const sharp = require("sharp");
 const awsUploadImage = require("../middlewares/awsUploadImage");
 const awsUploadVideo = require("../middlewares/awsUploadVideo");
 
-// Get Videos
 function getVideos(req, res) {
-  Video.find({})
-    .skip(0)
-    .limit(5)
-    .exec((err, videoStored) => {
-      Usuario.populate(videoStored, { path: "idUser" }, (err, videoStored) => {
-        if (err) {
-          return res.status(500).json({
-            ok: false,
-            err
-          });
-        }
+  const { page } = req.query;
 
-        if (!videoStored) {
-          return res.status(40).json({
-            ok: false,
-            err: {
-              message: "No se ha encontrado ningun video"
-            }
-          });
-        }
+  const options = {
+    page,
+    limit: 10,
+    populate: {
+      path: "idUser",
+      select: "name lastname"
+    }
+  };
 
-        res.json({
-          ok: true,
-          videoStored
-        });
+  Video.paginate({}, options, (err, videoStored) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        err
       });
+    }
+
+    if (!videoStored) {
+      return res.status(40).json({
+        ok: false,
+        err: {
+          message: "No se ha encontrado ningun video"
+        }
+      });
+    }
+
+    res.json({
+      ok: true,
+      ...videoStored
     });
+  });
+}
+
+function getVideosUser(req, res) {
+  const { page } = req.query;
+  const idUser = req.params.idUser;
+
+  const options = {
+    page,
+    limit: 10,
+    populate: {
+      path: "idUser",
+      select: "name lastname"
+    }
+  };
+
+  Video.paginate({ idUser }, options, (err, videoStored) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        err
+      });
+    }
+
+    if (!videoStored) {
+      return res.status(40).json({
+        ok: false,
+        err: {
+          message: "No se ha encontrado ningun video"
+        }
+      });
+    }
+
+    res.json({
+      ok: true,
+      ...videoStored
+    });
+  });
 }
 
 // Upload Videos
@@ -252,5 +294,6 @@ module.exports = {
   uploadVideo,
   getThumbnail,
   getVideo,
-  getVideoInfo
+  getVideoInfo,
+  getVideosUser
 };

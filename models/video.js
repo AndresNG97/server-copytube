@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
+const mongoosePaginate = require("mongoose-paginate-v2");
 
 let Schema = mongoose.Schema;
+
 let videoSchema = new Schema(
   {
     title: {
@@ -19,11 +21,13 @@ let videoSchema = new Schema(
       required: [true, "La url del thumbnail del video es necesaria"]
     },
     idUser: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: "Usuario",
       required: [true, "Es necesario la id del usuario del video"]
     }
   },
   { collection: "videos" }
 );
 
+videoSchema.plugin(mongoosePaginate);
 module.exports = mongoose.model("Video", videoSchema);

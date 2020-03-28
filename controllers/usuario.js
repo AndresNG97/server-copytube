@@ -1,5 +1,3 @@
-const fs = require("fs");
-const path = require("path");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Usuario = require("../models/usuario");
@@ -29,7 +27,7 @@ function register(req, res) {
 
     res.json({
       ok: true,
-      usuario: usuarioDB
+      message: "Te has registrado correctamente"
     });
   });
 }
@@ -71,7 +69,6 @@ function login(req, res) {
 
       res.json({
         ok: true,
-        usuarioDB,
         Authorization
       });
     }
@@ -217,8 +214,7 @@ function updateAccount(req, res) {
     userStored.password = bcrypt.hashSync(userStored.password, 10);
 
     res.json({
-      ok: true,
-      userStored
+      ok: true
     });
   });
 }
@@ -247,7 +243,10 @@ function getAvatar(req, res) {
     const { img } = userStored;
 
     if (!img) {
-      return res.sendFile(path.resolve("uploads/default/defaultAvatar.png"));
+      return res.json({
+        ok: true,
+        img: null
+      });
     }
 
     return res.json({
