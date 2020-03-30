@@ -183,9 +183,7 @@ function updateAccount(req, res) {
     "password"
   ]);
 
-  Usuario.findByIdAndUpdate(idUser, usuarioParams, {
-    new: true
-  }).exec((err, userStored) => {
+  Usuario.findById(idUser, (err, userStored) => {
     if (err) {
       return res.status(500).json({
         ok: false,
@@ -211,10 +209,20 @@ function updateAccount(req, res) {
       });
     }
 
-    userStored.password = bcrypt.hashSync(userStored.password, 10);
+    Usuario.findByIdAndUpdate(idUser, usuarioParams, {
+      new: true
+    }).exec(err => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          err
+        });
+      }
 
-    res.json({
-      ok: true
+      console.log("adsad");
+      res.json({
+        ok: true
+      });
     });
   });
 }

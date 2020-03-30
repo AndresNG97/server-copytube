@@ -3,7 +3,7 @@ const AWS = require("aws-sdk");
 // AWS S3
 const ID = "AKIAUXRR66KUDV2ADZN5";
 const SECRET = "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";
-// The name of the bucket that you have created
+
 const BUCKET_NAME = "copyserverbucket";
 
 const s3 = new AWS.S3({

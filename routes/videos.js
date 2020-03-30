@@ -24,4 +24,6 @@ api.get("/getVideosUser/:idUser", VideoController.getVideosUser);
 api.get("/getThumbnail/:idVideo", VideoController.getThumbnail);
 api.get("/getVideo/:idVideo", VideoController.getVideo);
 api.get("/getVideoInfo/:idVideo", VideoController.getVideoInfo);
+
+api.delete("/deleteVideo/:idVideo", verificaToken, VideoController.deleteVideo);
 module.exports = api;

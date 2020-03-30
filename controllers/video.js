@@ -7,6 +7,8 @@ var mime = require("mime-types");
 const sharp = require("sharp");
 const awsUploadImage = require("../middlewares/awsUploadImage");
 const awsUploadVideo = require("../middlewares/awsUploadVideo");
+const awsDeleteItems = require("../middlewares/awsDeleteItems");
+const bcrypt = require("bcrypt");
 
 function getVideos(req, res) {
   const { page } = req.query;
@@ -289,11 +291,72 @@ function getVideoInfo(req, res) {
   });
 }
 
+function deleteVideo(req, res) {
+  let body = req.body;
+  let idVideo = req.params.idVideo;
+  let idUser = body.idUser;
+
+  Video.findById(idVideo).exec((err, videoStored) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        err: {
+          message: "Error del servidor"
+        }
+      });
+    }
+
+    if (!videoStored) {
+      return res.status(400).json({
+        ok: false,
+        err: {
+          message: "Video no encontrado"
+        }
+      });
+    }
+
+    if (videoStored.idUser != idUser) {
+      return res.status(400).json({
+        ok: false,
+        err: {
+          message: "El video no coincide con el usuario"
+        }
+      });
+    }
+
+    let videoPath = videoStored.video.split("/");
+    let thumbnailPath = videoStored.thumbnail.split("/");
+    videoPath = `${videoPath[3]}/${videoPath[4]}/${videoPath[5]}`;
+    thumbnailPath = `${thumbnailPath[3]}/${thumbnailPath[4]}/${thumbnailPath[5]}`;
+
+    console.log(videoStored.video);
+
+    Video.findByIdAndDelete(idVideo, err => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          err: {
+            message: "Error del servidor"
+          }
+        });
+      }
+
+      awsDeleteItems(videoPath, thumbnailPath);
+
+      res.json({
+        ok: true,
+        message: "Video borrado"
+      });
+    });
+  });
+}
+
 module.exports = {
   getVideos,
   uploadVideo,
   getThumbnail,
   getVideo,
   getVideoInfo,
-  getVideosUser
+  getVideosUser,
+  deleteVideo
 };
