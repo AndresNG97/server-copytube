@@ -11,43 +11,8 @@ const awsDeleteItems = require("../middlewares/awsDeleteItems");
 const bcrypt = require("bcrypt");
 
 function getVideos(req, res) {
-  const { page } = req.query;
-
-  const options = {
-    page,
-    limit: 10,
-    populate: {
-      path: "idUser",
-      select: "name lastname"
-    }
-  };
-
-  Video.paginate({}, options, (err, videoStored) => {
-    if (err) {
-      return res.status(500).json({
-        ok: false,
-        err
-      });
-    }
-
-    if (!videoStored) {
-      return res.status(40).json({
-        ok: false,
-        err: {
-          message: "No se ha encontrado ningun video"
-        }
-      });
-    }
-
-    res.json({
-      ok: true,
-      ...videoStored
-    });
-  });
-}
-
-function getVideosByTitle(req, res) {
   const { page, search } = req.query;
+
   const options = {
     page,
     limit: 10,
@@ -392,7 +357,6 @@ function deleteVideo(req, res) {
 
 module.exports = {
   getVideos,
-  getVideosByTitle,
   uploadVideo,
   getThumbnail,
   getVideo,
