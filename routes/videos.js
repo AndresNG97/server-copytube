@@ -19,6 +19,7 @@ api.post(
 );
 
 api.get("/getVideos", VideoController.getVideos);
+api.get("/getVideosByTitle", VideoController.getVideosByTitle);
 api.get("/getVideosUser/:idUser", VideoController.getVideosUser);
 
 api.get("/getThumbnail/:idVideo", VideoController.getThumbnail);

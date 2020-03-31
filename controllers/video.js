@@ -46,6 +46,45 @@ function getVideos(req, res) {
   });
 }
 
+function getVideosByTitle(req, res) {
+  const { page, search } = req.query;
+  const options = {
+    page,
+    limit: 10,
+    populate: {
+      path: "idUser",
+      select: "name lastname"
+    }
+  };
+
+  Video.paginate(
+    { title: { $regex: search, $options: "i" } },
+    options,
+    (err, videoStored) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          err
+        });
+      }
+
+      if (!videoStored) {
+        return res.status(40).json({
+          ok: false,
+          err: {
+            message: "No se ha encontrado ningun video"
+          }
+        });
+      }
+
+      res.json({
+        ok: true,
+        ...videoStored
+      });
+    }
+  );
+}
+
 function getVideosUser(req, res) {
   const { page } = req.query;
   const idUser = req.params.idUser;
@@ -353,6 +392,7 @@ function deleteVideo(req, res) {
 
 module.exports = {
   getVideos,
+  getVideosByTitle,
   uploadVideo,
   getThumbnail,
   getVideo,
