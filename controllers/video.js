@@ -1,5 +1,3 @@
-const fs = require("fs");
-const path = require("path");
 const Video = require("../models/video");
 const Usuario = require("../models/usuario");
 const _ = require("underscore");
@@ -8,7 +6,6 @@ const sharp = require("sharp");
 const awsUploadImage = require("../middlewares/awsUploadImage");
 const awsUploadVideo = require("../middlewares/awsUploadVideo");
 const awsDeleteItems = require("../middlewares/awsDeleteItems");
-const bcrypt = require("bcrypt");
 
 function getVideos(req, res) {
   const { page, search } = req.query;
