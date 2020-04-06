@@ -4,7 +4,7 @@ const Comments = require("../models/comments");
 
 function validateAdmin(req, res) {
   res.json({
-    ok: true
+    ok: true,
   });
 }
 
@@ -12,14 +12,14 @@ async function getDashboardStats(req, res) {
   let data = {
     users: null,
     videos: null,
-    comments: null
+    comments: null,
   };
 
   await Usuario.countDocuments({}, (err, countUsers) => {
     if (err) {
       return res.status(500).json({
         ok: false,
-        err
+        err,
       });
     }
     data.users = countUsers;
@@ -29,7 +29,7 @@ async function getDashboardStats(req, res) {
     if (err) {
       return res.status(500).json({
         ok: false,
-        err
+        err,
       });
     }
     data.comments = countComments;
@@ -39,7 +39,7 @@ async function getDashboardStats(req, res) {
     if (err) {
       return res.status(500).json({
         ok: false,
-        err
+        err,
       });
     }
     data.videos = countVideos;
@@ -47,11 +47,49 @@ async function getDashboardStats(req, res) {
 
   res.json({
     ok: true,
-    data
+    data,
+  });
+}
+
+function getAllUsers(req, res) {
+  Usuario.find({})
+    .sort({ name: 1 })
+    .exec((err, userStored) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          err,
+        });
+      }
+
+      res.json({
+        ok: true,
+        userStored,
+      });
+    });
+}
+
+function getSpecificUser(req, res) {
+  const idUser = req.params.idUser;
+
+  Usuario.findById(idUser).exec((err, userStored) => {
+    if (err) {
+      return res.status(400).json({
+        ok: false,
+        err,
+      });
+    }
+
+    res.json({
+      ok: true,
+      userStored,
+    });
   });
 }
 
 module.exports = {
   validateAdmin,
-  getDashboardStats
+  getDashboardStats,
+  getAllUsers,
+  getSpecificUser,
 };

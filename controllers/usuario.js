@@ -14,20 +14,20 @@ function register(req, res) {
     name: body.name,
     lastname: body.lastname,
     email: body.email,
-    password: bcrypt.hashSync(body.password, 10)
+    password: bcrypt.hashSync(body.password, 10),
   });
 
   usuario.save((err, usuarioDB) => {
     if (err) {
       return res.status(400).json({
         ok: false,
-        err
+        err,
       });
     }
 
     res.json({
       ok: true,
-      message: "Te has registrado correctamente"
+      message: "Te has registrado correctamente",
     });
   });
 }
@@ -43,33 +43,33 @@ function login(req, res) {
       if (err) {
         return res.status(500).json({
           ok: false,
-          err
+          err,
         });
       }
       if (!usuarioDB) {
         return res.status(400).json({
           ok: false,
           err: {
-            message: "(Email) o Contraseña incorrectos"
-          }
+            message: "(Email) o Contraseña incorrectos",
+          },
         });
       }
-      console.log(usuarioDB);
+
       if (!bcrypt.compareSync(body.password, usuarioDB.password)) {
         return res.status(400).json({
           ok: false,
           err: {
-            message: "Email o (Contraseña) incorrectos"
-          }
+            message: "Email o (Contraseña) incorrectos",
+          },
         });
       }
       let Authorization = jwt.sign({ usuarioDB }, process.env.SEED_TOKEN, {
-        expiresIn: process.env.CADUCIDAD_TOKEN
+        expiresIn: process.env.CADUCIDAD_TOKEN,
       });
 
       res.json({
         ok: true,
-        Authorization
+        Authorization,
       });
     }
   );
@@ -85,8 +85,8 @@ async function updateAvatar(req, res) {
     return res.status(400).json({
       ok: false,
       err: {
-        message: "No se ha seleccionado ninguna imagen"
-      }
+        message: "No se ha seleccionado ninguna imagen",
+      },
     });
   }
 
@@ -99,24 +99,24 @@ async function updateAvatar(req, res) {
       ok: false,
       err: {
         message:
-          "La extension de la imagen no es valida. (Extensiones permitidas: png, jpg, jpeg"
-      }
+          "La extension de la imagen no es valida. (Extensiones permitidas: png, jpg, jpeg",
+      },
     });
   }
   const filePath = `uploads/avatars/${idUser}.${extension}`;
 
   sharp(avatar.tempFilePath)
     .resize(720, 405, {
-      fit: sharp.fit.fill
+      fit: sharp.fit.fill,
     })
-    .toBuffer(function(err, buffer) {
+    .toBuffer(function (err, buffer) {
       if (err) {
         return res.status(500).json({
           ok: false,
-          err
+          err,
         });
       }
-      awsUploadImage(buffer, filePath, function(result) {
+      awsUploadImage(buffer, filePath, function (result) {
         body.img = result;
         let usuarioParams = _.pick(req.body, ["img"]);
 
@@ -127,14 +127,14 @@ async function updateAvatar(req, res) {
             if (err) {
               return res.status(500).json({
                 ok: false,
-                err
+                err,
               });
             }
 
             if (!userStored) {
               return res.status(400).json({
                 ok: false,
-                err
+                err,
               });
             }
 
@@ -142,8 +142,8 @@ async function updateAvatar(req, res) {
               return res.status(400).json({
                 ok: false,
                 err: {
-                  message: "La contraseña actual es obligatoria"
-                }
+                  message: "La contraseña actual es obligatoria",
+                },
               });
             }
 
@@ -151,14 +151,14 @@ async function updateAvatar(req, res) {
               return res.status(400).json({
                 ok: false,
                 err: {
-                  message: "Las contraseñas no coinciden"
-                }
+                  message: "Las contraseñas no coinciden",
+                },
               });
             }
 
             res.json({
               ok: true,
-              message: "Avatar subido correctamente"
+              message: "Avatar subido correctamente",
             });
           }
         );
@@ -180,14 +180,14 @@ function updateAccount(req, res) {
     "name",
     "lastname",
     "email",
-    "password"
+    "password",
   ]);
 
   Usuario.findById(idUser, (err, userStored) => {
     if (err) {
       return res.status(500).json({
         ok: false,
-        err
+        err,
       });
     }
 
@@ -195,8 +195,8 @@ function updateAccount(req, res) {
       return res.status(400).json({
         ok: false,
         err: {
-          message: "No se ha encontrado el usuario"
-        }
+          message: "No se ha encontrado el usuario",
+        },
       });
     }
 
@@ -204,24 +204,23 @@ function updateAccount(req, res) {
       return res.status(400).json({
         ok: false,
         err: {
-          message: "Las contraseñas no coinciden"
-        }
+          message: "Las contraseñas no coinciden",
+        },
       });
     }
 
     Usuario.findByIdAndUpdate(idUser, usuarioParams, {
-      new: true
-    }).exec(err => {
+      new: true,
+    }).exec((err) => {
       if (err) {
         return res.status(500).json({
           ok: false,
-          err
+          err,
         });
       }
 
-      console.log("adsad");
       res.json({
-        ok: true
+        ok: true,
       });
     });
   });
@@ -235,16 +234,16 @@ function getAvatar(req, res) {
       return res.status(500).json({
         ok: false,
         err: {
-          message: "Error del servidor"
-        }
+          message: "Error del servidor",
+        },
       });
     }
     if (!userStored) {
       return res.status(400).json({
         ok: false,
         err: {
-          message: "Usuario no encontrado"
-        }
+          message: "Usuario no encontrado",
+        },
       });
     }
 
@@ -253,13 +252,13 @@ function getAvatar(req, res) {
     if (!img) {
       return res.json({
         ok: true,
-        img: null
+        img: null,
       });
     }
 
     return res.json({
       ok: true,
-      img
+      img,
     });
   });
 }
@@ -269,5 +268,5 @@ module.exports = {
   login,
   updateAccount,
   updateAvatar,
-  getAvatar
+  getAvatar,
 };

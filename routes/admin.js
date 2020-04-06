@@ -10,5 +10,11 @@ api.use(express.json());
 
 api.post("/validateAdmin", verificaRole, AdminController.validateAdmin);
 api.get("/getDashboardStats", verificaRole, AdminController.getDashboardStats);
+api.get("/getAllUsers", verificaRole, AdminController.getAllUsers);
+api.get(
+  "/getSpecificUser/:idUser",
+  verificaRole,
+  AdminController.getSpecificUser
+);
 
 module.exports = api;

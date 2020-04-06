@@ -7,11 +7,10 @@ const BUCKET_NAME = "copyserverbucket";
 
 const s3 = new AWS.S3({
   accessKeyId: ID,
-  secretAccessKey: SECRET
+  secretAccessKey: SECRET,
 });
 
 function awsDeleteItems(video, thumbnail) {
-  console.log(video);
   let params = {
     Bucket: BUCKET_NAME,
     Delete: {
@@ -19,16 +18,16 @@ function awsDeleteItems(video, thumbnail) {
       Objects: [
         // required
         {
-          Key: thumbnail // required
+          Key: thumbnail, // required
         },
         {
-          Key: video
-        }
-      ]
-    }
+          Key: video,
+        },
+      ],
+    },
   };
 
-  s3.deleteObjects(params, function(s3err, data) {
+  s3.deleteObjects(params, function (s3err, data) {
     if (s3err) console.log(s3err, s3err.stack);
     else console.log(data);
   });

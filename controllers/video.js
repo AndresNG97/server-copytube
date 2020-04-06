@@ -15,8 +15,8 @@ function getVideos(req, res) {
     limit: 10,
     populate: {
       path: "idUser",
-      select: "name lastname"
-    }
+      select: "name lastname",
+    },
   };
 
   Video.paginate(
@@ -26,7 +26,7 @@ function getVideos(req, res) {
       if (err) {
         return res.status(500).json({
           ok: false,
-          err
+          err,
         });
       }
 
@@ -34,14 +34,14 @@ function getVideos(req, res) {
         return res.status(40).json({
           ok: false,
           err: {
-            message: "No se ha encontrado ningun video"
-          }
+            message: "No se ha encontrado ningun video",
+          },
         });
       }
 
       res.json({
         ok: true,
-        ...videoStored
+        ...videoStored,
       });
     }
   );
@@ -56,15 +56,15 @@ function getVideosUser(req, res) {
     limit: 10,
     populate: {
       path: "idUser",
-      select: "name lastname"
-    }
+      select: "name lastname",
+    },
   };
 
   Video.paginate({ idUser }, options, (err, videoStored) => {
     if (err) {
       return res.status(500).json({
         ok: false,
-        err
+        err,
       });
     }
 
@@ -72,14 +72,14 @@ function getVideosUser(req, res) {
       return res.status(40).json({
         ok: false,
         err: {
-          message: "No se ha encontrado ningun video"
-        }
+          message: "No se ha encontrado ningun video",
+        },
       });
     }
 
     res.json({
       ok: true,
-      ...videoStored
+      ...videoStored,
     });
   });
 }
@@ -94,16 +94,16 @@ function uploadVideo(req, res) {
     description: body.description,
     video: "",
     thumbnail: "",
-    idUser
+    idUser,
   });
 
   Usuario.findById(idUser, {
-    new: true
+    new: true,
   }).exec(async (err, userStored) => {
     if (err) {
       return res.status(500).json({
         ok: false,
-        err
+        err,
       });
     }
 
@@ -111,8 +111,8 @@ function uploadVideo(req, res) {
       return res.status(400).json({
         ok: false,
         err: {
-          message: "Usuario no encontrado"
-        }
+          message: "Usuario no encontrado",
+        },
       });
     }
 
@@ -120,8 +120,8 @@ function uploadVideo(req, res) {
       return res.status(400).json({
         ok: false,
         err: {
-          message: "No se ha seleccionado ningun video"
-        }
+          message: "No se ha seleccionado ningun video",
+        },
       });
     }
 
@@ -138,8 +138,8 @@ function uploadVideo(req, res) {
         ok: false,
         err: {
           message:
-            "La extension del video no es valido. (Extensiones permitidas: png, jpeg)"
-        }
+            "La extension del video no es valido. (Extensiones permitidas: png, jpeg)",
+        },
       });
     }
 
@@ -155,42 +155,42 @@ function uploadVideo(req, res) {
         ok: false,
         err: {
           message:
-            "La extension del video no es valido. (Extensiones permitidas: mp4, avi)"
-        }
+            "La extension del video no es valido. (Extensiones permitidas: mp4, avi)",
+        },
       });
     }
 
     sharp(thumbnailFile.tempFilePath)
       .resize(720, 405, {
-        fit: sharp.fit.fill
+        fit: sharp.fit.fill,
       })
-      .toBuffer(function(err, buffer) {
+      .toBuffer(function (err, buffer) {
         if (err) {
           return res.status(500).json({
             ok: false,
-            err
+            err,
           });
         }
 
         let thumbnailPath = `uploads/thumbnail/${idVideo}.${extensionThumbnail}`;
-        awsUploadImage(buffer, thumbnailPath, function(resultImg) {
+        awsUploadImage(buffer, thumbnailPath, function (resultImg) {
           video.thumbnail = resultImg;
 
           let videoPath = `uploads/videos/${idVideo}.${extensionVideo}`;
-          awsUploadVideo(videoFile, videoPath, function(resultVideo) {
+          awsUploadVideo(videoFile, videoPath, function (resultVideo) {
             video.video = resultVideo;
 
             video.save((err, videoStored) => {
               if (err) {
                 return res.status(400).json({
                   ok: false,
-                  err
+                  err,
                 });
               }
 
               res.json({
                 ok: true,
-                videoStored
+                videoStored,
               });
             });
           });
@@ -207,8 +207,8 @@ function getThumbnail(req, res) {
       return res.status(500).json({
         ok: false,
         err: {
-          message: "Error del servidor"
-        }
+          message: "Error del servidor",
+        },
       });
     }
 
@@ -216,8 +216,8 @@ function getThumbnail(req, res) {
       return res.status(400).json({
         ok: false,
         err: {
-          message: "Video no encontrado"
-        }
+          message: "Video no encontrado",
+        },
       });
     }
 
@@ -225,7 +225,7 @@ function getThumbnail(req, res) {
 
     res.json({
       ok: true,
-      thumbnail
+      thumbnail,
     });
   });
 }
@@ -238,8 +238,8 @@ function getVideo(req, res) {
       return res.status(500).json({
         ok: false,
         err: {
-          message: "Error del servidor"
-        }
+          message: "Error del servidor",
+        },
       });
     }
 
@@ -247,8 +247,8 @@ function getVideo(req, res) {
       return res.status(400).json({
         ok: false,
         err: {
-          message: "Video no encontrado"
-        }
+          message: "Video no encontrado",
+        },
       });
     }
 
@@ -258,7 +258,7 @@ function getVideo(req, res) {
       ok: true,
       title,
       video,
-      description
+      description,
     });
   });
 }
@@ -271,8 +271,8 @@ function getVideoInfo(req, res) {
       return res.status(500).json({
         ok: false,
         err: {
-          message: "Error del servidor"
-        }
+          message: "Error del servidor",
+        },
       });
     }
 
@@ -280,14 +280,14 @@ function getVideoInfo(req, res) {
       return res.status(400).json({
         ok: false,
         err: {
-          message: "Video no encontrado"
-        }
+          message: "Video no encontrado",
+        },
       });
     }
 
     res.json({
       ok: true,
-      videoStored
+      videoStored,
     });
   });
 }
@@ -302,8 +302,8 @@ function deleteVideo(req, res) {
       return res.status(500).json({
         ok: false,
         err: {
-          message: "Error del servidor"
-        }
+          message: "Error del servidor",
+        },
       });
     }
 
@@ -311,8 +311,8 @@ function deleteVideo(req, res) {
       return res.status(400).json({
         ok: false,
         err: {
-          message: "Video no encontrado"
-        }
+          message: "Video no encontrado",
+        },
       });
     }
 
@@ -320,8 +320,8 @@ function deleteVideo(req, res) {
       return res.status(400).json({
         ok: false,
         err: {
-          message: "El video no coincide con el usuario"
-        }
+          message: "El video no coincide con el usuario",
+        },
       });
     }
 
@@ -330,15 +330,13 @@ function deleteVideo(req, res) {
     videoPath = `${videoPath[3]}/${videoPath[4]}/${videoPath[5]}`;
     thumbnailPath = `${thumbnailPath[3]}/${thumbnailPath[4]}/${thumbnailPath[5]}`;
 
-    console.log(videoStored.video);
-
-    Video.findByIdAndDelete(idVideo, err => {
+    Video.findByIdAndDelete(idVideo, (err) => {
       if (err) {
         return res.status(500).json({
           ok: false,
           err: {
-            message: "Error del servidor"
-          }
+            message: "Error del servidor",
+          },
         });
       }
 
@@ -346,7 +344,7 @@ function deleteVideo(req, res) {
 
       res.json({
         ok: true,
-        message: "Video borrado"
+        message: "Video borrado",
       });
     });
   });
@@ -359,5 +357,5 @@ module.exports = {
   getVideo,
   getVideoInfo,
   getVideosUser,
-  deleteVideo
+  deleteVideo,
 };
