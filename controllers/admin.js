@@ -8,46 +8,41 @@ function validateAdmin(req, res) {
   });
 }
 
-async function getDashboardStats(req, res) {
+function getDashboardStats(req, res) {
   let data = {
     users: null,
     videos: null,
     comments: null,
   };
 
-  await Usuario.countDocuments({}, (err, countUsers) => {
+  const getUser = Usuario.countDocuments({}, (err, countUsers) => {
     if (err) {
-      return res.status(500).json({
-        ok: false,
-        err,
-      });
     }
     data.users = countUsers;
+    console.log("1 - Users");
   });
 
-  await Comments.countDocuments({}, (err, countComments) => {
+  const getComments = Comments.countDocuments({}, (err, countComments) => {
     if (err) {
-      return res.status(500).json({
-        ok: false,
-        err,
-      });
     }
     data.comments = countComments;
+    console.log("2 - Comments");
   });
 
-  await Video.countDocuments({}, (err, countVideos) => {
+  const getVideos = Video.countDocuments({}, (err, countVideos) => {
     if (err) {
-      return res.status(500).json({
-        ok: false,
-        err,
-      });
     }
     data.videos = countVideos;
+    console.log("3 - Videos");
   });
 
-  res.json({
-    ok: true,
-    data,
+  Promise.all([getUser, getComments, getVideos]).then(() => {
+    console.log("4 - Send");
+
+    res.json({
+      ok: true,
+      data,
+    });
   });
 }
 
@@ -93,3 +88,61 @@ module.exports = {
   getAllUsers,
   getSpecificUser,
 };
+
+function deleteVideoUser(req, res) {
+  let body = req.body;
+  let idVideo = req.params.idVideo;
+  let idUser = body.idUser;
+
+  Video.findById(idVideo).exec((err, videoStored) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        err: {
+          message: "Error del servidor",
+        },
+      });
+    }
+
+    if (!videoStored) {
+      return res.status(400).json({
+        ok: false,
+        err: {
+          message: "Video no encontrado",
+        },
+      });
+    }
+
+    if (videoStored.idUser != idUser) {
+      return res.status(400).json({
+        ok: false,
+        err: {
+          message: "El video no coincide con el usuario",
+        },
+      });
+    }
+
+    let videoPath = videoStored.video.split("/");
+    let thumbnailPath = videoStored.thumbnail.split("/");
+    videoPath = `${videoPath[3]}/${videoPath[4]}/${videoPath[5]}`;
+    thumbnailPath = `${thumbnailPath[3]}/${thumbnailPath[4]}/${thumbnailPath[5]}`;
+
+    Video.findByIdAndDelete(idVideo, (err) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          err: {
+            message: "Error del servidor",
+          },
+        });
+      }
+
+      awsDeleteItems(videoPath, thumbnailPath);
+
+      res.json({
+        ok: true,
+        message: "Video borrado",
+      });
+    });
+  });
+}
