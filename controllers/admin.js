@@ -1,6 +1,7 @@
 const Usuario = require("../models/usuario");
 const Video = require("../models/video");
 const Comments = require("../models/comments");
+const awsDeleteItems = require("../middlewares/awsDeleteItems");
 
 function validateAdmin(req, res) {
   res.json({
@@ -19,26 +20,21 @@ function getDashboardStats(req, res) {
     if (err) {
     }
     data.users = countUsers;
-    console.log("1 - Users");
   });
 
   const getComments = Comments.countDocuments({}, (err, countComments) => {
     if (err) {
     }
     data.comments = countComments;
-    console.log("2 - Comments");
   });
 
   const getVideos = Video.countDocuments({}, (err, countVideos) => {
     if (err) {
     }
     data.videos = countVideos;
-    console.log("3 - Videos");
   });
 
   Promise.all([getUser, getComments, getVideos]).then(() => {
-    console.log("4 - Send");
-
     res.json({
       ok: true,
       data,
@@ -82,17 +78,8 @@ function getSpecificUser(req, res) {
   });
 }
 
-module.exports = {
-  validateAdmin,
-  getDashboardStats,
-  getAllUsers,
-  getSpecificUser,
-};
-
 function deleteVideoUser(req, res) {
-  let body = req.body;
   let idVideo = req.params.idVideo;
-  let idUser = body.idUser;
 
   Video.findById(idVideo).exec((err, videoStored) => {
     if (err) {
@@ -109,15 +96,6 @@ function deleteVideoUser(req, res) {
         ok: false,
         err: {
           message: "Video no encontrado",
-        },
-      });
-    }
-
-    if (videoStored.idUser != idUser) {
-      return res.status(400).json({
-        ok: false,
-        err: {
-          message: "El video no coincide con el usuario",
         },
       });
     }
@@ -146,3 +124,11 @@ function deleteVideoUser(req, res) {
     });
   });
 }
+
+module.exports = {
+  validateAdmin,
+  getDashboardStats,
+  getAllUsers,
+  getSpecificUser,
+  deleteVideoUser,
+};

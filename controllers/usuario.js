@@ -17,7 +17,7 @@ function register(req, res) {
     password: bcrypt.hashSync(body.password, 10),
   });
 
-  usuario.save((err, usuarioDB) => {
+  usuario.save((err, userStored) => {
     if (err) {
       return res.status(400).json({
         ok: false,
@@ -39,14 +39,14 @@ function login(req, res) {
 
   Usuario.findOne(
     { email: { $regex: new RegExp("^" + body.email, "i") } },
-    (err, usuarioDB) => {
+    (err, userStored) => {
       if (err) {
         return res.status(500).json({
           ok: false,
           err,
         });
       }
-      if (!usuarioDB) {
+      if (!userStored) {
         return res.status(400).json({
           ok: false,
           err: {
@@ -55,7 +55,7 @@ function login(req, res) {
         });
       }
 
-      if (!bcrypt.compareSync(body.password, usuarioDB.password)) {
+      if (!bcrypt.compareSync(body.password, userStored.password)) {
         return res.status(400).json({
           ok: false,
           err: {
@@ -63,13 +63,18 @@ function login(req, res) {
           },
         });
       }
-      let Authorization = jwt.sign({ usuarioDB }, process.env.SEED_TOKEN, {
-        expiresIn: process.env.CADUCIDAD_TOKEN,
+      let accessToken = jwt.sign({ userStored }, process.env.SEED_TOKEN, {
+        expiresIn: process.env.CADUCIDAD_ACCESS_TOKEN,
+      });
+
+      let refreshToken = jwt.sign({ userStored }, process.env.SEED_TOKEN, {
+        expiresIn: process.env.CADUCIDAD_REFRESH_TOKEN,
       });
 
       res.json({
         ok: true,
-        Authorization,
+        accessToken,
+        refreshToken,
       });
     }
   );
@@ -263,10 +268,35 @@ function getAvatar(req, res) {
   });
 }
 
+function getNewAccessToken(req, res) {
+  const idUser = req.params.idUser;
+
+  Usuario.findById(idUser, (err, userStored) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        err: {
+          message: "Error del servidor",
+        },
+      });
+    }
+
+    let accessToken = jwt.sign({ userStored }, process.env.SEED_TOKEN, {
+      expiresIn: process.env.CADUCIDAD_ACCESS_TOKEN,
+    });
+
+    return res.json({
+      ok: true,
+      accessToken,
+    });
+  });
+}
+
 module.exports = {
   register,
   login,
   updateAccount,
   updateAvatar,
   getAvatar,
+  getNewAccessToken,
 };

@@ -21,5 +21,10 @@ api.put(
 );
 api.get("/getAvatar/:idUser", UserController.getAvatar);
 api.put("/updateAccount/:idUser", verificaToken, UserController.updateAccount);
+api.get(
+  "/getNewAccessToken/:idUser",
+  verificaToken,
+  UserController.getNewAccessToken
+);
 
 module.exports = api;

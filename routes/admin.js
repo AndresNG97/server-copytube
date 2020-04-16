@@ -16,5 +16,10 @@ api.get(
   verificaRole,
   AdminController.getSpecificUser
 );
+api.delete(
+  "/deleteVideoUser/:idVideo",
+  verificaRole,
+  AdminController.deleteVideoUser
+);
 
 module.exports = api;

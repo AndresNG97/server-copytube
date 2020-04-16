@@ -9,8 +9,8 @@ let verificaToken = (req, res, next) => {
       return res.status(401).json({
         ok: false,
         err: {
-          message: "Token invalido."
-        }
+          message: "Token invalido.",
+        },
       });
     }
     req.usuario = decoded.usuarioDB;
@@ -26,19 +26,19 @@ let verificaRole = (req, res, next) => {
       return res.status(401).json({
         ok: false,
         err: {
-          message: "Token invalido."
-        }
+          message: "Token invalido.",
+        },
       });
     }
 
-    let usuario = decoded.usuarioDB;
+    let usuario = decoded.userStored;
 
     if (usuario.role !== "ADMIN_ROLE") {
       return res.status(401).json({
         ok: false,
         err: {
-          message: "No tienes permisos"
-        }
+          message: "No tienes permisos",
+        },
       });
     }
     next();
@@ -47,5 +47,5 @@ let verificaRole = (req, res, next) => {
 
 module.exports = {
   verificaToken,
-  verificaRole
+  verificaRole,
 };
