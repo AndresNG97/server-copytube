@@ -17,5 +17,5 @@ process.env.SEED_TOKEN =
 // 60 Minutos
 // 24 Horas
 // 30 Dias
-process.env.CADUCIDAD_ACCESS_TOKEN = "1m";
+process.env.CADUCIDAD_ACCESS_TOKEN = "30m";
 process.env.CADUCIDAD_REFRESH_TOKEN = "1w";
