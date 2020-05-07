@@ -63,13 +63,21 @@ function login(req, res) {
           },
         });
       }
-      let accessToken = jwt.sign({ userStored }, process.env.SEED_TOKEN, {
-        expiresIn: process.env.CADUCIDAD_ACCESS_TOKEN,
-      });
+      let accessToken = jwt.sign(
+        { userStored },
+        process.env.SEED_ACCESS_TOKEN,
+        {
+          expiresIn: process.env.CADUCIDAD_ACCESS_TOKEN,
+        }
+      );
 
-      let refreshToken = jwt.sign({ userStored }, process.env.SEED_TOKEN, {
-        expiresIn: process.env.CADUCIDAD_REFRESH_TOKEN,
-      });
+      let refreshToken = jwt.sign(
+        { userStored },
+        process.env.SEED_REFRESH_TOKEN,
+        {
+          expiresIn: process.env.CADUCIDAD_REFRESH_TOKEN,
+        }
+      );
 
       res.json({
         ok: true,
@@ -269,7 +277,7 @@ function getAvatar(req, res) {
 }
 
 function getNewAccessToken(req, res) {
-  const idUser = req.params.idUser;
+  const idUser = req.usuario._id;
 
   Usuario.findById(idUser, (err, userStored) => {
     if (err) {
@@ -281,7 +289,7 @@ function getNewAccessToken(req, res) {
       });
     }
 
-    let accessToken = jwt.sign({ userStored }, process.env.SEED_TOKEN, {
+    let accessToken = jwt.sign({ userStored }, process.env.SEED_ACCESS_TOKEN, {
       expiresIn: process.env.CADUCIDAD_ACCESS_TOKEN,
     });
 

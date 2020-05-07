@@ -3,7 +3,10 @@ const UserController = require("../controllers/usuario");
 const fileUpload = require("express-fileupload");
 const api = express.Router();
 
-const { verificaToken } = require("../middlewares/autenticacion");
+const {
+  verificaToken,
+  verificaRefreshToken,
+} = require("../middlewares/autenticacion");
 const file = fileUpload({ useTempFiles: true });
 
 api.use(express.urlencoded({ extended: false }));
@@ -22,8 +25,8 @@ api.put(
 api.get("/getAvatar/:idUser", UserController.getAvatar);
 api.put("/updateAccount/:idUser", verificaToken, UserController.updateAccount);
 api.get(
-  "/getNewAccessToken/:idUser",
-  verificaToken,
+  "/getNewAccessToken",
+  verificaRefreshToken,
   UserController.getNewAccessToken
 );
 

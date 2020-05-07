@@ -9,13 +9,11 @@ let urlDB =
 
 process.env.NODE_ENV = urlDB;
 
-process.env.SEED_TOKEN =
-  "xiH3+OLPffcn6mSqCbVNpflAKPwRz+StrkW6yHZUGsgHdfjo5TOIyR2YmF6Jr+1uBldhxVq9BRmwVi4V3wABIA==";
+process.env.SEED_ACCESS_TOKEN =
+  "yu8F!4BXANxcb_c-$W&5j2Es@_HPKe^e_6v736Y-?mqs#ebKttQ45Ls$M6*UL+T+";
 
-// Vencimiento del Token
-// 60 Segundos
-// 60 Minutos
-// 24 Horas
-// 30 Dias
-process.env.CADUCIDAD_ACCESS_TOKEN = "30m";
+process.env.SEED_REFRESH_TOKEN =
+  "@FFV7^&cksSC=U9^rQ!K@N6$dxV&p4dbsLPXNzq4kyCer5d@$&pBb^5RUs*_u7Hw";
+
+process.env.CADUCIDAD_ACCESS_TOKEN = "1m";
 process.env.CADUCIDAD_REFRESH_TOKEN = "1w";
