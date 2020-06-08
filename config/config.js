@@ -15,5 +15,5 @@ process.env.SEED_ACCESS_TOKEN =
 process.env.SEED_REFRESH_TOKEN =
   "@FFV7^&cksSC=U9^rQ!K@N6$dxV&p4dbsLPXNzq4kyCer5d@$&pBb^5RUs*_u7Hw";
 
-process.env.CADUCIDAD_ACCESS_TOKEN = "1m";
+process.env.CADUCIDAD_ACCESS_TOKEN = "15m";
 process.env.CADUCIDAD_REFRESH_TOKEN = "1w";

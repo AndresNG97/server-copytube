@@ -29,5 +29,6 @@ api.get(
   verificaRefreshToken,
   UserController.getNewAccessToken
 );
+api.get("/getUserInfo/:idUser", UserController.getUserInfo);
 
 module.exports = api;

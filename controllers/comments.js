@@ -1,10 +1,10 @@
 const Comments = require("../models/comments");
 const Usuario = require("../models/usuario");
-const moment = require("moment");
+const moment = require("moment-timezone");
 
 function uploadComment(req, res) {
   const body = req.body;
-  let date = moment().format("DD/MM/YYYY HH:mm:ss");
+  let date = moment().tz("Europe/Madrid").format("DD/MM/YYYY HH:mm:ss");
 
   let comments = new Comments({
     comment: body.comment,

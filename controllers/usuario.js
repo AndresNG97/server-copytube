@@ -46,6 +46,7 @@ function login(req, res) {
           err,
         });
       }
+
       if (!userStored) {
         return res.status(400).json({
           ok: false,
@@ -63,6 +64,7 @@ function login(req, res) {
           },
         });
       }
+
       let accessToken = jwt.sign(
         { userStored },
         process.env.SEED_ACCESS_TOKEN,
@@ -94,6 +96,8 @@ async function updateAvatar(req, res) {
   let idUser = req.params.idUser;
   let body = req.body;
 
+  Usuario.findById(idUser, (err, userStored) => {});
+
   if (!req.files) {
     return res.status(400).json({
       ok: false,
@@ -107,76 +111,75 @@ async function updateAvatar(req, res) {
   const extension = mime.extension(avatar.mimetype);
   const extensionValidas = ["png", "jpg", "jpeg"];
 
-  if (extensionValidas.indexOf(extension) < 0) {
-    return res.status(400).json({
-      ok: false,
-      err: {
-        message:
-          "La extension de la imagen no es valida. (Extensiones permitidas: png, jpg, jpeg",
-      },
-    });
-  }
-  const filePath = `uploads/avatars/${idUser}.${extension}`;
+  Usuario.findById(idUser, async (err, userStored) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        err,
+      });
+    }
 
-  sharp(avatar.tempFilePath)
-    .resize(720, 405, {
-      fit: sharp.fit.fill,
-    })
-    .toBuffer(function (err, buffer) {
-      if (err) {
-        return res.status(500).json({
-          ok: false,
-          err,
-        });
-      }
-      awsUploadImage(buffer, filePath, function (result) {
-        body.img = result;
-        let usuarioParams = _.pick(req.body, ["img"]);
+    if (!userStored) {
+      return res.status(400).json({
+        ok: false,
+        err,
+      });
+    }
 
-        Usuario.findByIdAndUpdate(
-          idUser,
-          usuarioParams,
-          async (err, userStored) => {
-            if (err) {
-              return res.status(500).json({
-                ok: false,
-                err,
-              });
-            }
+    if (!body.actualPassword) {
+      return res.status(400).json({
+        ok: false,
+        err: {
+          message: "La contraseña actual es obligatoria",
+        },
+      });
+    }
 
-            if (!userStored) {
-              return res.status(400).json({
-                ok: false,
-                err,
-              });
-            }
+    if (!bcrypt.compareSync(body.actualPassword, userStored.password)) {
+      return res.status(400).json({
+        ok: false,
+        err: {
+          message: "Las contraseñas no coinciden",
+        },
+      });
+    }
 
-            if (!body.actualPassword) {
-              return res.status(400).json({
-                ok: false,
-                err: {
-                  message: "La contraseña actual es obligatoria",
-                },
-              });
-            }
+    if (extensionValidas.indexOf(extension) < 0) {
+      return res.status(400).json({
+        ok: false,
+        err: {
+          message:
+            "La extension de la imagen no es valida. (Extensiones permitidas: png, jpg, jpeg",
+        },
+      });
+    }
 
-            if (!bcrypt.compareSync(body.actualPassword, userStored.password)) {
-              return res.status(400).json({
-                ok: false,
-                err: {
-                  message: "Las contraseñas no coinciden",
-                },
-              });
-            }
+    const filePath = `uploads/avatars/${idUser}.${extension}`;
 
+    sharp(avatar.tempFilePath)
+      .resize(720, 405, {
+        fit: sharp.fit.fill,
+      })
+      .toBuffer(function (err, buffer) {
+        if (err) {
+          return res.status(500).json({
+            ok: false,
+            err,
+          });
+        }
+        awsUploadImage(buffer, filePath, function (result) {
+          body.img = result;
+          let usuarioParams = _.pick(req.body, ["img"]);
+
+          Usuario.findByIdAndUpdate(idUser, usuarioParams, async () => {
             res.json({
               ok: true,
               message: "Avatar subido correctamente",
             });
-          }
-        );
+          });
+        });
       });
-    });
+  });
 }
 
 // Update Account
@@ -209,6 +212,15 @@ function updateAccount(req, res) {
         ok: false,
         err: {
           message: "No se ha encontrado el usuario",
+        },
+      });
+    }
+
+    if (!body.actualPassword) {
+      return res.status(400).json({
+        ok: false,
+        err: {
+          message: "No se ha introducido la contraseña actual",
         },
       });
     }
@@ -276,6 +288,26 @@ function getAvatar(req, res) {
   });
 }
 
+function getUserInfo(req, res) {
+  const idUser = req.params.idUser;
+
+  Usuario.findById(idUser, (err, userStored) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        err: {
+          message: "Error del servidor",
+        },
+      });
+    }
+
+    return res.json({
+      ok: true,
+      userStored,
+    });
+  });
+}
+
 function getNewAccessToken(req, res) {
   const idUser = req.usuario._id;
 
@@ -307,4 +339,5 @@ module.exports = {
   updateAvatar,
   getAvatar,
   getNewAccessToken,
+  getUserInfo,
 };
