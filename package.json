@@ -23,7 +23,7 @@
     "mime-types": "^2.1.26",
     "mongoose": "^5.9.5",
     "mongoose-unique-validator": "^2.0.3",
-    "sharp": "^0.25.2",
+    "sharp": "^0.30.5",
     "underscore": "^1.9.2"
   }
 }
